@@ -101,6 +101,11 @@ public class GameStateManager : MonoBehaviour
     public void FindMatches()
     {
         ReadBoard();
+        StartCoroutine(ClearOrbs());
+    }
+
+    IEnumerator ClearOrbs()
+    {
         for (int y = 0; y < boardVertical; y++)
         {
             for (int x = 0; x < boardHorizontal; x++)
@@ -111,11 +116,29 @@ public class GameStateManager : MonoBehaviour
                     int vertical = 0;
                     vertical += CheckUpwards(new Vector2(x, y), orbBoard[x, y].GetOrbType());
                     vertical += CheckDownwards(new Vector2(x, y - 1), orbBoard[x, y].GetOrbType());
-                    if (vertical >= matchRequirement){
+
+                    if (vertical >= matchRequirement)
+                    {
                         foreach (GameObject g in comboOrbs)
                         {
                             Destroy(g);
                         }
+                        yield return new WaitForSeconds(2);
+                    }
+
+                    comboOrbs = new List<GameObject>();
+
+                    int horizontal = 0;
+                    horizontal += CheckLeftwards(new Vector2(x, y), orbBoard[x, y].GetOrbType());
+                    horizontal += CheckRightwards(new Vector2(x + 1, y), orbBoard[x, y].GetOrbType());
+
+                    if (horizontal >= matchRequirement)
+                    {
+                        foreach (GameObject g in comboOrbs)
+                        {
+                            Destroy(g);
+                        }
+                        yield return new WaitForSeconds(2);
                     }
                 }
             }
@@ -158,7 +181,7 @@ public class GameStateManager : MonoBehaviour
             if (thisOrb.GetOrbType() == orbType)
             {
                 comboOrbs.Add(thisOrb.gameObject);
-                return 1 + CheckDownwards(index + Vector2.left, orbType);
+                return 1 + CheckLeftwards(index + Vector2.left, orbType);
             }
         }
         return 0;
@@ -172,7 +195,7 @@ public class GameStateManager : MonoBehaviour
             if (thisOrb.GetOrbType() == orbType)
             {
                 comboOrbs.Add(thisOrb.gameObject);
-                return 1 + CheckDownwards(index + Vector2.right, orbType);
+                return 1 + CheckRightwards(index + Vector2.right, orbType);
             }
         }
         return 0;
