@@ -32,7 +32,8 @@ public class GameStateManager : MonoBehaviour
     [SerializeField]
     int boardVertical = 5;
 
-    List<GameObject> comboOrbs;
+    List<GemBehaviour> potentialOrbs;
+    List<GemBehaviour> comboOrbs;
 
     GemBehaviour[,] orbBoard;
     bool[,] orbChecked;
@@ -98,48 +99,128 @@ public class GameStateManager : MonoBehaviour
         return new Vector2(-450 + tile.x * orbSize, -390 + tile.y * orbSize);
     }
 
-    public void FindMatches()
+    public void FindMatches(float delay)
     {
         ReadBoard();
-        StartCoroutine(ClearOrbs());
+        StartCoroutine(ClearOrbs(delay));
     }
 
-    IEnumerator ClearOrbs()
+    IEnumerator ClearOrbs(float delay)
     {
+        yield return new WaitForSeconds(delay);
         for (int y = 0; y < boardVertical; y++)
         {
             for (int x = 0; x < boardHorizontal; x++)
             {
                 if (!orbChecked[x, y])
                 {
-                    comboOrbs = new List<GameObject>();
-                    int vertical = 0;
-                    vertical += CheckUpwards(new Vector2(x, y), orbBoard[x, y].GetOrbType());
-                    vertical += CheckDownwards(new Vector2(x, y - 1), orbBoard[x, y].GetOrbType());
+                    comboOrbs = new List<GemBehaviour>();
+                    potentialOrbs = new List<GemBehaviour>();
 
-                    if (vertical >= matchRequirement)
+                    CheckMatchAt(x, y);
+
+                    if (comboOrbs.Count > 0)
                     {
-                        foreach (GameObject g in comboOrbs)
+                        int i = 1;
+                        while (i < comboOrbs.Count)
                         {
-                            Destroy(g);
+                            Vector2 index = comboOrbs[i].GetTileIndex();
+                            CheckMatchAt((int)index.x, (int)index.y);
+                            i++;
                         }
-                        yield return new WaitForSeconds(2);
+                        foreach (GemBehaviour g in comboOrbs)
+                        {
+                            Destroy(g.gameObject);
+                        }
+                        yield return new WaitForSeconds(0.5f);
                     }
+                }
+            }
+        }
+        TriggerSkyFall();
+    }
 
-                    comboOrbs = new List<GameObject>();
-
-                    int horizontal = 0;
-                    horizontal += CheckLeftwards(new Vector2(x, y), orbBoard[x, y].GetOrbType());
-                    horizontal += CheckRightwards(new Vector2(x + 1, y), orbBoard[x, y].GetOrbType());
-
-                    if (horizontal >= matchRequirement)
+    public void TriggerSkyFall()
+    {
+        bool missingOrbs = false;
+        for (int y = 0; y < boardVertical; y++)
+        {
+            for (int x = 0; x < boardHorizontal; x++)
+            {
+                if (orbBoard[x, y] != null)
+                {
+                    int newY = y;
+                    while (newY > 0)
                     {
-                        foreach (GameObject g in comboOrbs)
-                        {
-                            Destroy(g);
-                        }
-                        yield return new WaitForSeconds(2);
+                        if (orbBoard[x, newY - 1] == null) newY--;
+                        else break;
                     }
+                    if (newY != y)
+                    {
+                        orbBoard[x, newY] = orbBoard[x, y];
+                        orbBoard[x, y] = null;
+                        orbBoard[x, newY].SetTilePosition(new Vector2(x, newY));
+                        orbBoard[x, newY].ApplyPositionOnBoard();
+                    }
+                }
+            }
+        }
+
+        for (int y = 0; y < boardVertical; y++)
+        {
+            for (int x = 0; x < boardHorizontal; x++)
+            {
+                if (orbBoard[x, y] == null)
+                {
+                    missingOrbs = true;
+                    Vector2 pos = new Vector2(-450 + x * orbSize, -390 + y * orbSize);
+                    GameObject orb = Instantiate(orbPrefabs[Random.Range(0, orbPrefabs.Length)], Vector3.zero, Quaternion.identity, transform);
+                    orb.GetComponent<RectTransform>().anchoredPosition = pos;
+                    GemBehaviour gem = orb.GetComponent<GemBehaviour>();
+                    gem.SetTilePosition(new Vector2(x, y));
+                    orbBoard[x, y] = gem;
+                }
+            }
+        }
+
+        if (missingOrbs)
+        {
+            FindMatches(0.6f);
+        }
+    }
+
+    void CheckMatchAt(int x, int y)
+    {
+        potentialOrbs = new List<GemBehaviour>();
+
+        int vertical = 0;
+        vertical += CheckUpwards(new Vector2(x, y), orbBoard[x, y].GetOrbType());
+        vertical += CheckDownwards(new Vector2(x, y - 1), orbBoard[x, y].GetOrbType());
+
+        if (vertical >= matchRequirement)
+        {
+            foreach (GemBehaviour g in potentialOrbs)
+            {
+                if (!comboOrbs.Contains(g))
+                {
+                    comboOrbs.Add(g);
+                }
+            }
+        }
+
+        potentialOrbs = new List<GemBehaviour>();
+
+        int horizontal = 0;
+        horizontal += CheckLeftwards(new Vector2(x - 1, y), orbBoard[x, y].GetOrbType());
+        horizontal += CheckRightwards(new Vector2(x, y), orbBoard[x, y].GetOrbType());
+
+        if (horizontal >= matchRequirement)
+        {
+            foreach (GemBehaviour g in potentialOrbs)
+            {
+                if (!comboOrbs.Contains(g))
+                {
+                    comboOrbs.Add(g);
                 }
             }
         }
@@ -152,7 +233,8 @@ public class GameStateManager : MonoBehaviour
             GemBehaviour thisOrb = orbBoard[(int)index.x, (int)index.y];
             if (thisOrb.GetOrbType() == orbType)
             {
-                comboOrbs.Add(thisOrb.gameObject);
+                if (thisOrb != null)
+                potentialOrbs.Add(thisOrb);
                 return 1 + CheckUpwards(index + Vector2.up, orbType);
             }
         }
@@ -166,7 +248,8 @@ public class GameStateManager : MonoBehaviour
             GemBehaviour thisOrb = orbBoard[(int)index.x, (int)index.y];
             if (thisOrb.GetOrbType() == orbType)
             {
-                comboOrbs.Add(thisOrb.gameObject);
+                if (thisOrb != null)
+                potentialOrbs.Add(thisOrb);
                 return 1 + CheckDownwards(index + Vector2.down, orbType);
             }
         }
@@ -180,7 +263,8 @@ public class GameStateManager : MonoBehaviour
             GemBehaviour thisOrb = orbBoard[(int)index.x, (int)index.y];
             if (thisOrb.GetOrbType() == orbType)
             {
-                comboOrbs.Add(thisOrb.gameObject);
+                if (thisOrb != null)
+                potentialOrbs.Add(thisOrb);
                 return 1 + CheckLeftwards(index + Vector2.left, orbType);
             }
         }
@@ -194,7 +278,8 @@ public class GameStateManager : MonoBehaviour
             GemBehaviour thisOrb = orbBoard[(int)index.x, (int)index.y];
             if (thisOrb.GetOrbType() == orbType)
             {
-                comboOrbs.Add(thisOrb.gameObject);
+                if (thisOrb != null)
+                potentialOrbs.Add(thisOrb);
                 return 1 + CheckRightwards(index + Vector2.right, orbType);
             }
         }

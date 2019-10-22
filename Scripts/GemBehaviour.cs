@@ -58,7 +58,7 @@ public class GemBehaviour : MonoBehaviour
         orbPicked = false;
         transform.SetSiblingIndex(savedSiblingIndex);
         ApplyPositionOnBoard();
-        game.FindMatches();
+        game.FindMatches(0);
     }
 
     public void SetTilePosition(Vector2 newIndex)

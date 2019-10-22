@@ -94,8 +94,8 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaDirect: 0.5
     m_PVRFilteringAtrousPositionSigmaIndirect: 2
     m_PVRFilteringAtrousPositionSigmaAO: 1
-    m_ShowResolutionOverlay: 1
     m_ExportTrainingData: 0
+    m_TrainingDataDestination: TrainingData
   m_LightingDataAsset: {fileID: 0}
   m_UseShadowmask: 1
 --- !u!196 &4
@@ -258,6 +258,7 @@ MonoBehaviour:
   - {fileID: 942320703222195341, guid: 627f5426a1d164749813b63aceb66c37, type: 3}
   - {fileID: 942320703222195341, guid: d63b1d67942201f4e98dca61e11e222d, type: 3}
   - {fileID: 942320703222195341, guid: 25411f5f8960a734ca73592dc09f77b1, type: 3}
+  - {fileID: 942320703222195341, guid: fef416cb89078834c99782ecbd473bc9, type: 3}
   maxMoveTime: 10
   remainingMoveTime: 10
   gemBoard: {fileID: 661462897}
@@ -291,7 +292,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1145396521}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1301386320, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreReversedGraphics: 1
@@ -308,7 +309,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1145396521}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1980459831, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_UiScaleMode: 1
@@ -389,7 +390,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1734865510}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1077351063, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_HorizontalAxis: Horizontal
@@ -408,7 +409,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1734865510}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -619905303, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_FirstSelected: {fileID: 0}
